@@ -1,6 +1,6 @@
 # DS18B20DallasOneWire
 
-Dallas/Maxim OneWire Library implementation for DS18B20 (and possible others) digital temperature sensors.
+Atmel AVR platform Dallas/Maxim OneWire Library implementation for DS18B20 (and possible others) digital temperature sensors.
 
 It's ATmega32 and ATmega328p (16MHz) ready.
 
