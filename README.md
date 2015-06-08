@@ -4,9 +4,9 @@ Atmel AVR platform Dallas/Maxim OneWire Library implementation for DS18B20 (and 
 
 It's ATmega32 and ATmega328p (16MHz) ready.
 
-For your platform modifications:
- - consult registers names in UART files
- - output pin configuration in dallas_one_wire.* files.).
+For your platform modifications consult:
+ - registers names and timing in UART files
+ - output pin configuration and 1wire bus frame timing in dallas_one_wire.* files
 
 dallas_one_wire library	- Copyright © 2010, Mike Roddewig (with little modifications from me).
 
