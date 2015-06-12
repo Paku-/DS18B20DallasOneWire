@@ -1,9 +1,9 @@
 /*
- * DS18B20(!) OneWire sensor
+ * DS18B20(!) OneWire sensor DEMO
  *
  * Copyright © 2015  Paku
  *
- * It may not work for other DS18x20 family chips!
+ * It may need some modifications for other DS18x20 family chips!
  * ATmega 32 and 328p (16MHz) ready
  * For other modifications:
  * - consult registers names in UART files
@@ -47,122 +47,54 @@
 
  *
  */
-
-
-#include <util/delay.h>
-#include <stdio.h>
+#include "dallas_paku_lib.h"
 #include "USART.h"
-#include "dallas_one_wire.h"
+#include "lcd_lib.h"
 
 
-
-//Real number like representation of dallas two byte temp value
-typedef struct {
-	char sign;
-	uint8_t integer;
-	uint16_t fraction;
-} DALLAS_TEMP;
-
-char ticker_[8]={'|','/','-','\\','|','/','-','\\'};
-
-//Slaves list
-DALLAS_IDENTIFIER_LIST_t * ids;
-
-//Scratchpad
-uint8_t scratchpad[9];
-
-//Converts Dallas two byte temperature into real like structure
-DALLAS_TEMP getDallasTemp(uint8_t msb, uint8_t lsb) {
-
-/*
- *chip precision definition
- *11 bits temp converter mode
- *4 LSBs value stands for 0.0625 deg Centigrades .
- *so 0010 means: 0.0625x2 on fractional part.
- */
-#define PRECISION 625
-
-	DALLAS_TEMP temp;
-	temp.sign='+';
-
-	uint16_t result;
-
-	//put lsb and msb into int16
-	result = msb;
-	result = ((result << 8) | lsb);
-
-	//test if temperature is negative then process data
-	if (result & 0xF800) {
-		result = ~result + 1;
-		temp.sign='-';
-	}
-
-	//drop 4 lsb bits for integral part
-	temp.integer = (result >> 4);
-	//use 4 lsb bits for decimal part
-	temp.fraction = (result & 0x000F)*PRECISION;
-
-	return temp;
-}
-
-
-void search_bus() {
-
-	uint8_t i;
-
-	if (dallas_reset()) {
-
-		switch (dallas_search_identifiers()) {
-		case 0x00:
-			printf("> Bus Test - OK\r\n");
-			break;
-		case 0x01:
-			printf("> Error!!! Buss error\r\n");
-			break;
-		case 0x02:
-			printf("> Error!!! More devices then specified\r\n");
-			break;
-		default:
-			printf("> Error!!! Unknown INIT message\r\n");
-			break;
-		}
-
-		ids = get_identifier_list();
-
-		//Output IDs found.
-		for (i = 0; i < DALLAS_NUM_IDENTIFIER_BITS / 8; i++) {
-			printf("%X",ids->identifiers[0].identifier[i]);
-			if (i == 7)
-				printf("\r\n");
-			else
-				printf(":");
-		}
-
-		printf("> IDs collecting  finished\r\n");
-
-	} else
-		printf("BUS Error: No slaves found\r\n");
-
-	return;
-}
+const uint8_t LCDtitle[] PROGMEM="1Wire Bus Master\0";
+const uint8_t LCDbusInit[] PROGMEM="  BUS INIT ...  \0";
 
 
 int main(void) {
 
-	DALLAS_TEMP temp;
+	/*
+	 * UI variables
+	 */
 
-	//output ticker
+	char ticker_[8]={'|','/','-','\\','|','/','-','\\'};
 	uint8_t ticker=0;
+	uint16_t count=0;
+	char line[30];
+
+
+	/*
+	 * OneWire Variables
+	 */
+	uint8_t chip_scratchpad[9];
+	DALLAS_TEMPERATURE temp;
+
+
+	LCDinit();
+	CopyStringtoLCD(LCDtitle, 0, 0);
+	CopyStringtoLCD(LCDbusInit, 0, 1);
 
 	USART_vInit();
+
 
 	//set stdout to USART
 	FILE stream = FDEV_SETUP_STREAM(USART_vSendByte,NULL, _FDEV_SETUP_WRITE);
 	stdout=&stream;
 
+
 	printf("\r\n* One-Wire Bus Master Monitor *\r\n");
 
+	//search bus and UART.printf slave ID
 	search_bus();
+
+
+	_delay_ms(1000);
+	LCDclr();
 
 	while (1) {
 
@@ -174,20 +106,50 @@ int main(void) {
 
 			if (dallas_command(SKIP_ROM_COMMAND, 1)) {
 				dallas_command(READ_SCRATCHPAD_COMMAND, 0);
-				dallas_read_buffer(scratchpad, 9);
+				dallas_read_buffer(chip_scratchpad, 9);
 
-				temp=getDallasTemp(scratchpad[1],scratchpad[0]);
+				temp=getDallasTemp(chip_scratchpad[1],chip_scratchpad[0]);
 
-				printf("%c Temp: 0x%02X%02Xh %c%d.%04d\r\n",ticker_[ticker%8],scratchpad[1],scratchpad[0],temp.sign,temp.integer,temp.fraction);
+				//create output string
+				sprintf(line,"%c%5d Temp: 0x%02X%02Xh %c%d.%04d\r\n",ticker_[ticker++%8],count++,chip_scratchpad[1],chip_scratchpad[0],temp.sign,temp.integer,temp.fraction);
+
+				//printf("%c Temp: 0x%02X%02Xh %c%d.%04d\r\n",ticker_[ticker%8],scratchpad[1],scratchpad[0],temp.sign,temp.integer,temp.fraction);
 				//remove '\n' to get one line output
 
+				//send it over USART/stdout
+				printf("%s",line);
 
-			}
+				//send to LCD as well
+
+				//backslash as user defined char for non-european LCD ROMS.
+				if (line[0]=='\\'){
+					//put the user defined character 0 into first position = backslash
+					//backslash is defined inside LCDinit() by default (under code 0x07)
+					line[0]=0x07;
+				}
+
+				LCDgotoXY(10,0);
+				LCDstring((uint8_t *)line,6);
+
+
+				//show substring (x,x+16) on LCD
+				LCDgotoXY(0,1);
+				LCDstring((uint8_t *)line+13,14);
+
+				//display °C
+				LCDgotoXY(14,1);
+				//degree sign = °
+				LCDsendChar(0x06);
+				LCDgotoXY(15,1);
+				LCDsendChar('C');
+
+
+			}else
+				printf("BUS Error: READ_SCRATCHPAD\r\n");
 		} else
-			printf("BUS Error: No slave respond\r\n");
+			printf("BUS Error: No slaves found\r\n");
 
 		_delay_ms(100);
-		ticker++;
 
 	}
 
