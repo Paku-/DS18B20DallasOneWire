@@ -1,17 +1,17 @@
 ![alt tag](https://travis-ci.org/Paku-/DS18B20DallasOneWire.svg?branch=master)
 # DS18B20DallasOneWire
 
-Atmel AVR platform Dallas/Maxim OneWire Library implementation for DS18B20 (and possible others) digital temperature sensors.
+Dallas/Maxim OneWire Library implementation on ATMEL 8-bit AVR platform.
 
-It's ATmega32 and ATmega328p (16MHz) ready.
+- Chip tested is DS18B20 digital temperature sensor.
+
+- UART and LCD output.
+- ATmega32 and ATmega328p (16MHz) ready.
 
 For your platform modifications consult:
- - registers names and timing in UART files
  - output pin configuration and 1wire bus frame timing in dallas_one_wire.* files
-
-dallas_one_wire library	- Copyright © 2010, Mike Roddewig (with little modifications from me).
-
-Build on Atmel ATmega328p using AVR8 GCC toolchain 3.4.1061
+ - registers names and timing in UART files
+ - LCD configuration in LCD*.h file
 
 This is a free software, under MIT License.
 
@@ -20,6 +20,14 @@ Copyright © 2015  Paku
 Have fun,
 
 Paku
+
+
+dallas_one_wire library	- GNU Copyright © 2010, Mike Roddewig (with little modifications from me).
+
+LCD library - GNU Scienceprog.com - Copyright (C) 2007
+
+(both libs modified)
+
 
 
 ##Expected UART output 
