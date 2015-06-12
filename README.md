@@ -1,3 +1,4 @@
+![alt tag](https://travis-ci.org/Paku-/AvrTravisTest.svg?branch=master)
 # DS18B20DallasOneWire
 
 Atmel AVR platform Dallas/Maxim OneWire Library implementation for DS18B20 (and possible others) digital temperature sensors.
