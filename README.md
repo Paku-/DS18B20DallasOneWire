@@ -1,7 +1,7 @@
 ![alt tag](https://travis-ci.org/Paku-/DS18B20DallasOneWire.svg?branch=master)
 # DS18B20DallasOneWire
 
-Dallas/Maxim OneWire Library implementation on ATMEL 8-bit AVR platform.
+Dallas/Maxim OneWire Library implementation for ATMEL 8-bit AVR platform.
 
 - Chip tested is DS18B20 digital temperature sensor.
 
@@ -22,7 +22,7 @@ Have fun,
 Paku
 
 
-dallas_one_wire library	- GNU Copyright © 2010, Mike Roddewig (with little modifications from me).
+dallas_one_wire library	- GNU Copyright © 2010, Mike Roddewig
 
 LCD library - GNU Scienceprog.com - Copyright (C) 2007
 
