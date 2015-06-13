@@ -111,7 +111,7 @@ int main(void) {
 				temp=getDallasTemp(chip_scratchpad[1],chip_scratchpad[0]);
 
 				//create output string
-				sprintf(line,"%c%5d Temp: 0x%02X%02Xh %c%d.%04d\r\n",ticker_[ticker++%8],count++,chip_scratchpad[1],chip_scratchpad[0],temp.sign,temp.integer,temp.fraction);
+				sprintf(line,"%c%5u Temp: 0x%02X%02Xh %c%d.%04d\r\n",ticker_[ticker++%8],count++,chip_scratchpad[1],chip_scratchpad[0],temp.sign,temp.integer,temp.fraction);
 
 				//printf("%c Temp: 0x%02X%02Xh %c%d.%04d\r\n",ticker_[ticker%8],scratchpad[1],scratchpad[0],temp.sign,temp.integer,temp.fraction);
 				//remove '\n' to get one line output
